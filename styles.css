@@ -32,7 +32,6 @@ footer {
     color: #333;
     text-align: center;
     padding: 0.6rem 0;
-    /* position: absolute; */
     bottom: 0;
     width: 100%;
     font-size: 0.98rem;
@@ -44,7 +43,6 @@ main {
     flex: 1;
     flex-wrap: wrap;
     justify-content: center;
-    /* align-items: center; */
     padding: 1rem;
 }
 
@@ -108,9 +106,6 @@ button:active {
     padding: 1.5rem 0 1.2rem 0;
 }
 
-
-
-
 .cloud {
     position: absolute;
     width: 15rem; 
@@ -150,13 +145,7 @@ button:active {
     height: 6rem;
     transform-style: preserve-3d;
     box-sizing: border-box;
-
-
     transition: transform 0.5s;
-
-
-
-
 }
 
 .face {

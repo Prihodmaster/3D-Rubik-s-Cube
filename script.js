@@ -16,9 +16,26 @@ let locationFace = 0;
 let isTwoFingerGesture = false;
 cubeContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
-const colorFace = (front, back, up, down, left, right) =>  { 
-    return {front, back, up, down, left, right}
- };
+const colorMap = {
+    red: '#FF3D00',        
+    yellow: '#FFDD00',    
+    green: '#00B34D',     
+    blue: '#1E88E5',       
+    white: '#F7F7F7',      
+    black: 'black',        
+    orange: '#E87000'      
+};
+
+const colorFace = (front, back, up, down, left, right) => { 
+    return {
+        front: colorMap[front] || front,
+        back: colorMap[back] || back,
+        up: colorMap[up] || up,
+        down: colorMap[down] || down,
+        left: colorMap[left] || left,
+        right: colorMap[right] || right
+    };
+};
 
 const cubeColor = {
     front: [
@@ -299,90 +316,6 @@ const shuffleColorsInCubeArray = () => {
 
 
 
-
-// let isTwoFingerGesture = false;
-
-
-// const getCoordinates = e => {
-//     if (e.touches && e.touches.length > 0) {
-//         return {
-//             x: e.touches[0].clientX,
-//             y: e.touches[0].clientY,
-//             isTwoFinger: e.touches.length === 2 // Добавляем проверку на двухпальцевый жест
-//         };
-//     }
-//     return {
-//         x: e.clientX,
-//         y: e.clientY,
-//         isTwoFinger: false // Мышь всегда однопальцевая
-//     };
-// };
-
-// const handleStart = e => {
-//     e.preventDefault();
-//     const { x, y } = getCoordinates(e);
-//     const face = e.target.closest('.face');
-//     const sticker = e.target.closest('.sticker');
-
-//     if (face && sticker) {
-//         isDragging = true;
-//         startX = x;
-//         startY = y;
-//         activeFace = face;
-//         stickerBounds = sticker.querySelectorAll('[class^="side"]');
-//         locationClass = Array.from(face.classList).find(cls => cls.startsWith('location-'));
-//         console.log(locationClass);
-//     } 
-//     else if (!['face', 'sticker'].some(className => e.target.classList.contains(className))) {
-//         isRotateScope = true;
-//         startRotateScopeX = x;
-//         startRotateScopeY = y;
-//     }
-// }
-
-// const handleMove = e =>  {
-//     const { x, y } = getCoordinates(e);
-//     if (isDragging && activeFace) {
-//         stickerBounds.forEach(side => {
-//             const bounds = side.getBoundingClientRect();
-//             if (x > bounds.left && x < bounds.right && y > bounds.top && y < bounds.bottom) {
-//                 const direction = side.className.split('-')[1];
-//                 rotateFaceMouse(direction);
-//                 isDragging = false;
-//                 return;
-//             }
-//         });
-//     } else if (isRotateScope) {
-//         const deltaX = x - startRotateScopeX;
-//         const deltaY = y - startRotateScopeY;
-//         rotateY += deltaX * 0.2; // Умножение на 0.2 для замедления вращения
-//         rotateX -= deltaY * 0.2;
-//         cubeContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-//         startRotateScopeX = x;
-//         startRotateScopeY = y;
-//     }
-// }
-
-// const handleEnd = () => {
-//     if (isDragging) {
-//         isDragging = false;
-//         activeFace = null;
-//         faceBounds = null;
-//         startX = 0;
-//         startY = 0;
-//         stickerBounds = null;
-//         locationClass = null;
-//     }
-//     if (isRotateScope) {
-//         isRotateScope = false;
-//     }
-// }
-
-
-
-
-
-
 const getCoordinates = e => {
     if (e.touches && e.touches.length > 0) {
         return {
@@ -416,7 +349,6 @@ const handleStart = e => {
         activeFace = face;
         stickerBounds = sticker.querySelectorAll('[class^="side"]');
         locationClass = Array.from(face.classList).find(cls => cls.startsWith('location-'));
-        console.log(locationClass);
     } else if (!['face', 'sticker'].some(className => e.target.classList.contains(className))) {
         isRotateScope = true;
         startRotateScopeX = x;
@@ -487,7 +419,7 @@ const createFace = (face, color) => {
 
     const stickerElement = document.createElement('div');
     stickerElement.classList.add('sticker');
-    stickerElement.style.backgroundColor = color;
+    stickerElement.style.background = color;
 
     const sides = ['side-up', 'side-right', 'side-down', 'side-left'];
     sides.forEach(side => {
@@ -531,15 +463,12 @@ const createCube = () => {
     cubeArray.slice(0, 27).forEach((cube, index) => {
         const cubeElement = document.createElement('div');
         cubeElement.classList.add('cubie');
-        // cubeElement.style.transform = `translate3d(${cubeArray[index].positions.x * sizeCubie}rem, ${cubeArray[index].positions.y *sizeCubie}rem, ${cubeArray[index].positions.z *sizeCubie}rem)`;
         cubeElement.style.transform = `translate3d(${positions[index].x * sizeCubie}rem, ${positions[index].y *sizeCubie}rem, ${positions[index].z *sizeCubie}rem)`;
-
         for (const face in cube) {
             if(face!=='positions'){
             const faceElement = createFace(face, cube[face]);
             cubeElement.appendChild(faceElement);}
         }
-
         cubeContainer.appendChild(cubeElement);
     });
 };
@@ -782,7 +711,6 @@ const locationMappings = {
     'location-52': [4, 5, 17, 16]
   };
 const rotateFaceMouse = direction => {
-    console.log(direction)
   const directionsMap = {
     down: 0,
     up: 1,
@@ -791,19 +719,19 @@ const rotateFaceMouse = direction => {
   };
 
   if (!locationMappings[locationClass]) {
-    console.warn(`locationClass ${locationClass} не найден в locationMappings`);
+    console.warn(`locationClass ${locationClass} not found in locationMappings`);
     return;
   }
 
   const index = directionsMap[direction];
   if (index === undefined) {
-    console.warn(`Неправильное направление: ${direction}`);
+    console.warn(`Wrong direction: ${direction}`);
     return;
   }
 
   const funcIndex = locationMappings[locationClass][index];
   if (!arrayRotateFunc[funcIndex]) {
-    console.warn(`Функция с индексом ${funcIndex} не найдена`);
+    console.warn(`Function with index ${funcIndex} not found`);
     return;
   }
   arrayRotateFunc[funcIndex]();
@@ -885,13 +813,5 @@ window.addEventListener('load', () => {
     createCloud('./images/cloud-2.png', '35%', '50s', '16s');  
     createCloud('./images/cloud-3.png', '70%', '140s', '16s'); 
 });
-
-
-
-
-
-
-
-
 
 
