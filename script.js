@@ -13,6 +13,7 @@ let stickerBounds;
 let activeFace = null;
 let locationClass = null;
 let locationFace = 0;
+let isTwoFingerGesture = false;
 cubeContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
 const colorFace = (front, back, up, down, left, right) =>  { 
@@ -299,24 +300,112 @@ const shuffleColorsInCubeArray = () => {
 
 
 
+// let isTwoFingerGesture = false;
+
+
+// const getCoordinates = e => {
+//     if (e.touches && e.touches.length > 0) {
+//         return {
+//             x: e.touches[0].clientX,
+//             y: e.touches[0].clientY,
+//             isTwoFinger: e.touches.length === 2 // Добавляем проверку на двухпальцевый жест
+//         };
+//     }
+//     return {
+//         x: e.clientX,
+//         y: e.clientY,
+//         isTwoFinger: false // Мышь всегда однопальцевая
+//     };
+// };
+
+// const handleStart = e => {
+//     e.preventDefault();
+//     const { x, y } = getCoordinates(e);
+//     const face = e.target.closest('.face');
+//     const sticker = e.target.closest('.sticker');
+
+//     if (face && sticker) {
+//         isDragging = true;
+//         startX = x;
+//         startY = y;
+//         activeFace = face;
+//         stickerBounds = sticker.querySelectorAll('[class^="side"]');
+//         locationClass = Array.from(face.classList).find(cls => cls.startsWith('location-'));
+//         console.log(locationClass);
+//     } 
+//     else if (!['face', 'sticker'].some(className => e.target.classList.contains(className))) {
+//         isRotateScope = true;
+//         startRotateScopeX = x;
+//         startRotateScopeY = y;
+//     }
+// }
+
+// const handleMove = e =>  {
+//     const { x, y } = getCoordinates(e);
+//     if (isDragging && activeFace) {
+//         stickerBounds.forEach(side => {
+//             const bounds = side.getBoundingClientRect();
+//             if (x > bounds.left && x < bounds.right && y > bounds.top && y < bounds.bottom) {
+//                 const direction = side.className.split('-')[1];
+//                 rotateFaceMouse(direction);
+//                 isDragging = false;
+//                 return;
+//             }
+//         });
+//     } else if (isRotateScope) {
+//         const deltaX = x - startRotateScopeX;
+//         const deltaY = y - startRotateScopeY;
+//         rotateY += deltaX * 0.2; // Умножение на 0.2 для замедления вращения
+//         rotateX -= deltaY * 0.2;
+//         cubeContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+//         startRotateScopeX = x;
+//         startRotateScopeY = y;
+//     }
+// }
+
+// const handleEnd = () => {
+//     if (isDragging) {
+//         isDragging = false;
+//         activeFace = null;
+//         faceBounds = null;
+//         startX = 0;
+//         startY = 0;
+//         stickerBounds = null;
+//         locationClass = null;
+//     }
+//     if (isRotateScope) {
+//         isRotateScope = false;
+//     }
+// }
+
+
+
+
+
 
 const getCoordinates = e => {
     if (e.touches && e.touches.length > 0) {
         return {
             x: e.touches[0].clientX,
             y: e.touches[0].clientY,
+            isTwoFinger: e.touches.length === 2
         };
     }
     return {
         x: e.clientX,
         y: e.clientY,
+        isTwoFinger: false
     };
-}
-
+};
 
 const handleStart = e => {
+    const { x, y, isTwoFinger } = getCoordinates(e);
+    if (isTwoFinger) {
+        isTwoFingerGesture = true;
+        return;
+    }
+
     e.preventDefault();
-    const { x, y } = getCoordinates(e);
     const face = e.target.closest('.face');
     const sticker = e.target.closest('.sticker');
 
@@ -328,16 +417,20 @@ const handleStart = e => {
         stickerBounds = sticker.querySelectorAll('[class^="side"]');
         locationClass = Array.from(face.classList).find(cls => cls.startsWith('location-'));
         console.log(locationClass);
-    } 
-    else if (!['face', 'sticker'].some(className => e.target.classList.contains(className))) {
+    } else if (!['face', 'sticker'].some(className => e.target.classList.contains(className))) {
         isRotateScope = true;
         startRotateScopeX = x;
         startRotateScopeY = y;
     }
-}
+};
 
-const handleMove = e =>  {
-    const { x, y } = getCoordinates(e);
+const handleMove = e => {
+    const { x, y, isTwoFinger } = getCoordinates(e);
+    if (isTwoFingerGesture) {
+        return;
+    }
+
+    e.preventDefault(); 
     if (isDragging && activeFace) {
         stickerBounds.forEach(side => {
             const bounds = side.getBoundingClientRect();
@@ -351,15 +444,20 @@ const handleMove = e =>  {
     } else if (isRotateScope) {
         const deltaX = x - startRotateScopeX;
         const deltaY = y - startRotateScopeY;
-        rotateY += deltaX * 0.2; // Умножение на 0.2 для замедления вращения
+        rotateY += deltaX * 0.2; 
         rotateX -= deltaY * 0.2;
         cubeContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         startRotateScopeX = x;
         startRotateScopeY = y;
     }
-}
+};
 
-const handleEnd = () => {
+const handleEnd = e => {
+    if (isTwoFingerGesture) {
+        isTwoFingerGesture = false;
+        return;
+    }
+
     if (isDragging) {
         isDragging = false;
         activeFace = null;
@@ -372,14 +470,14 @@ const handleEnd = () => {
     if (isRotateScope) {
         isRotateScope = false;
     }
-}
+};
 
 document.addEventListener('mousedown', handleStart);
 document.addEventListener('mousemove', handleMove);
 document.addEventListener('mouseup', handleEnd);
 
-document.addEventListener('touchstart', handleStart);
-document.addEventListener('touchmove', handleMove);
+document.addEventListener('touchstart', handleStart, { passive: false });
+document.addEventListener('touchmove', handleMove, { passive: false });
 document.addEventListener('touchend', handleEnd);
 
 
@@ -735,7 +833,7 @@ const flashRed = () => {
     }, 500);
 }
 
-startButton.addEventListener('click', () => {
+const handleStartButton = () => {
     if (!timer) {
         flashRed();
         timer = setInterval(() => {
@@ -743,20 +841,33 @@ startButton.addEventListener('click', () => {
             updateTimer();
         }, 1000);
     }
-});
+};
 
-resetButton.addEventListener('click', () => {
+const handleResetButton = () => {
     flashRed();
     clearInterval(timer);
     timer = null;
     secondsElapsed = 0;
     updateTimer();
-});
+};
 
-generateButton.addEventListener('click', () => {
+const handleGenerateButton = () => {
     shuffleColorsInCubeArray();
     updateCubeArray();
-});
+};
+
+const addButtonEvent = (button, callback) => {
+    button.addEventListener('click', callback);
+    button.addEventListener('touchstart', e => {
+        e.preventDefault(); 
+        callback();
+    }, { passive: false });
+};
+
+addButtonEvent(startButton, handleStartButton);
+addButtonEvent(resetButton, handleResetButton);
+addButtonEvent(generateButton, handleGenerateButton);
+
 
 window.addEventListener('load', () => {
     const createCloud = (src, top, animationDuration, delay) => {

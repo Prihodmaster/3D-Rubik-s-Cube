@@ -248,6 +248,12 @@ button:active {
     }
 }
 
+@media (max-width: 951px) {
+    * {
+        font-size: 10px;
+    }
+}
+
 @media (min-width: 1441px) and (max-width: 1919px) {
     * {
         font-size: 16px;
